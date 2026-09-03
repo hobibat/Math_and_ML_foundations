@@ -1,6 +1,29 @@
 import numpy as np
 
-#for using functions from another file
+#______________________________________________________________
+import os
+import sys
+import importlib.util
+
+# 1. Resolve path to the normal equation file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
+normal_eq_path = os.path.join(
+    project_root, "00_Math_foundation", "03_normal_equation.py"
+)
+
+# 2. Load the module dynamically (handles file names starting with numbers)
+spec = importlib.util.spec_from_file_location(
+    "normal_equation_module", normal_eq_path
+)
+normal_eq_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(normal_eq_module)
+
+# 3. Pull the function
+normal_equation = normal_eq_module.normal_equation
+
+
+
 import importlib.util
 from pathlib import Path
 # Locate the file dynamically
@@ -103,3 +126,10 @@ for i in range(n):
     print(f" weight no.{i+1}: {w_num[i]: .4f}")
 print(f"{b_num: .4f}")
 
+
+# Pass training data into normal_equation
+w_normal, y_hat_normal, e_normal = normal_equation(X_train, y_train)
+
+# Compare with gradient descent weights
+print("Normal Equation Weights:\n", w_normal)
+print("Gradient Descent Weights:\n", w_final)
