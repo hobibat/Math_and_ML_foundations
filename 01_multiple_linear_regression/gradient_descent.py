@@ -124,6 +124,7 @@ print("\n \n")
 w_num, b_num= numerical_descent(X_train, y_train, w_init, b_init, 1500)
 for i in range(n):
     print(f" weight no.{i+1}: {w_num[i]: .4f}")
+
 print(f"{b_num: .4f}")
 
 
@@ -131,5 +132,9 @@ print(f"{b_num: .4f}")
 w_normal, y_hat_normal, e_normal = normal_equation(X_train, y_train)
 
 # Compare with gradient descent weights
-print("Normal Equation Weights:\n", w_normal)
+print("Normal Equation Weights:\n", w_normal[:-1])
 print("Gradient Descent Weights:\n", w_final)
+
+print("\n \nNormal Equation bias: \n", w_normal[-1])
+print("Gradient Descent bias:\n", b_final)
+
