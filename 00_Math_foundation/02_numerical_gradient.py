@@ -51,11 +51,6 @@ def numeric_gradient_descent(X_train, y_train, w_init, b_init, iters):
 
     for epoch in range(iters):
 
-        w, b= numeric_gradient(X_train, y_train, w, b, 0.01)
-
-        #for debugging
-        if epoch % 100==0:
-            cost=get_cost(X_train, y_train, w, b)
-            print(f" cost on {epoch}th iteration is: {cost: .4f}")
+        w, b= numeric_gradient(X_train, y_train, w, b, 0.1)
 
     return w, b  

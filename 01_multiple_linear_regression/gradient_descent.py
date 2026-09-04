@@ -37,6 +37,15 @@ numerical_descent = module.numeric_gradient_descent
 
 #______________________________________________________________________
 
+def z_score_normalization(X_train):
+    #it's the x1 minus mu over the deviation
+    mu= np.mean(X_train, axis=0) #mu will be an nx1 column matrix that has the mean of each column
+    sigma= np.std(X_train, axis=0)
+
+    normalized_x= (X_train - mu)/sigma
+    return normalized_x
+#______________________________________________________________________
+
 np.random.seed(8) #freeze generated random numbers so they never change on reruns
 
 def get_cost(X, y, w, b):
@@ -47,7 +56,6 @@ def get_cost(X, y, w, b):
 
     cost/=(2*m)
     return cost
-
 
 #___________________________________________________________________________
 
@@ -75,17 +83,14 @@ def gradient_descent(X_train, y_train, w_init, b_init, alpha, iters):
     #and i would do this for thousand times and update w
     w=w_init.copy()
     b=b_init
+    cost_history=[0.0]*iters
 
     for epoch in range(iters):
 
         w, b= analytical_gradient(X_train, y_train, w, b, alpha)
+        cost_history[epoch]=get_cost(X_train, y_train, w, b)
 
-        #for debugging
-        if epoch % 100==0:
-            cost=get_cost(X_train, y_train, w, b)
-            print(f" cost on {epoch}th iteration is: {cost: .4f}")
-
-    return w, b
+    return w, b, cost_history
 
 
 
@@ -102,7 +107,7 @@ b_true = np.random.randn()
 
 
 #ture vector of parameters
-y_train =np.dot(X_train, w_true) +b_true
+y_train =np.dot(z_score_normalization(X_train), w_true) +b_true
 
 
 #initial vector of parameters
@@ -113,28 +118,42 @@ b_init = np.random.randn()
 
 
 
-w_final, b_final= gradient_descent(X_train, y_train, w_init, b_init, 0.01, 1500)
+w_final, b_final, cost_history= gradient_descent(
+     z_score_normalization(X_train)
+     , y_train, w_init, b_init, 0.1, 1500
+     )#i changed alpha to a bigger value cuz we use the normalized x now, so we don't want to make the step such a small value
+      #cuz normalization makes the function run way faster
 
-for i in range(n):
-    print(f" weight no.{i+1}: {w_final[i]: .4f}")
-print(f"final bias is: {b_final: .4f}")
-print("\n \n")
+
 #________________________________________________________________
 
-w_num, b_num= numerical_descent(X_train, y_train, w_init, b_init, 1500)
-for i in range(n):
-    print(f" weight no.{i+1}: {w_num[i]: .4f}")
-
-print(f"{b_num: .4f}")
+w_num, b_num= numerical_descent( 
+    z_score_normalization(X_train)
+    , y_train, w_init, b_init, 1500
+    )
 
 
 # Pass training data into normal_equation
-w_normal, y_hat_normal, e_normal = normal_equation(X_train, y_train)
+w_normal, y_hat_normal, e_normal = normal_equation(
+     z_score_normalization(X_train),
+     y_train
+     )
 
 # Compare with gradient descent weights
 print("Normal Equation Weights:\n", w_normal[:-1])
 print("Gradient Descent Weights:\n", w_final)
+print("NUmerical Gradient Descent Weights:\n", w_num)
+
 
 print("\n \nNormal Equation bias: \n", w_normal[-1])
 print("Gradient Descent bias:\n", b_final)
+print("Numerica Gradient Descent bias:\n", b_num)
 
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8, 5))
+plt.plot(cost_history, color="royalblue", linewidth=2)
+plt.title("Cost vs. Iterations (Learning Curve)", fontsize=14)
+plt.xlabel("Iteration / Epoch", fontsize=12)
+plt.ylabel("Cost J(w, b)", fontsize=12)
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.show()
